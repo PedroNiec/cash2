@@ -2,6 +2,8 @@ import TotalBetsCard from '../../components/TotalBetsCard'
 import ProfitLossCard from '../../components/ProfitLossCard'
 import TotalBankCard from '../../components/TotalBank'
 import WeeklyPLChart from '../../components/WeeklyPLChart'
+import MethodsCard from '../../components/MethodsCard'
+
 
 export default function DashboardPage() {
   return (
@@ -15,6 +17,7 @@ export default function DashboardPage() {
       <ProfitLossCard />
       <TotalBankCard />
       <WeeklyPLChart />
+      <MethodsCard />
     </div>
   )
 }
