@@ -3,6 +3,8 @@ import ProfitLossCard from '../../components/ProfitLossCard'
 import TotalBankCard from '../../components/TotalBank'
 import WeeklyPLChart from '../../components/WeeklyPLChart'
 import MethodsCard from '../../components/MethodsCard'
+import TotalGreensCard from '@/components/TotalGreensBets'
+import TotalRedsCard from '@/components/TotalRedsBets'
 
 
 export default function DashboardPage() {
@@ -16,6 +18,8 @@ export default function DashboardPage() {
       <TotalBetsCard />
       <ProfitLossCard />
       <TotalBankCard />
+      <TotalGreensCard/>
+      <TotalRedsCard/>
       <WeeklyPLChart />
       <MethodsCard />
     </div>
