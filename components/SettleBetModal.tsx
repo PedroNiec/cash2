@@ -11,7 +11,7 @@ type Bet = {
   id: string
   stake: number
   status: string | null
-  profit_loss: any
+  profit_loss: number | null
   percentage: number | null
 }
 

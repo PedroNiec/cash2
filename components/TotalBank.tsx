@@ -8,8 +8,13 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+type Balance = {
+  id: string
+  balance : number
+}
+
 export default function TotalBankCard() {
-  const [data, setData] = useState<any[] | null>(null)
+  const [data, setData] = useState<Balance[] | null>(null)
   const [loading, setLoading] = useState(true)
 
   const fetchTotal = async () => {
