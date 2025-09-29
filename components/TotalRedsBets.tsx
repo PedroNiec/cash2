@@ -5,35 +5,32 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = 'https://ytiyrfliszifyuhghiqg.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0aXlyZmxpc3ppZnl1aGdoaXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzMTYzNjIsImV4cCI6MjA3Mzg5MjM2Mn0.DRmIJ0hee4kX7wdXt2OMXhaJ6-9RG6wL5FKZTw5hOz4'
-
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-type Balance = {
-  id: string
-  balance : number
-}
-
-export default function TotalBankCard() {
-  const [data, setData] = useState<Balance[] | null>(null)
+export default function TotalRedsCard() {
+  const [total, setTotal] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const fetchTotal = async () => {
+  const fetchReds = async () => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('balance')
-      .select('*')
-      .order('id', { ascending: false })
-      .limit(1)
-
-    if (error) console.error(error)
-    else setData(data)
-
+  
+    const { count, error } = await supabase
+      .from('bets')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'red') 
+  
+    if (error) {
+      console.error(error)
+      setTotal(0)
+    } else {
+      setTotal(count || 0)
+    }
+  
     setLoading(false)
   }
+  
 
-  useEffect(() => { fetchTotal() }, [])
-
-  const ultimoBalance = data && data.length > 0 ? data[0].balance : 0
+  useEffect(() => { fetchReds() }, [])
 
   return (
     <div style={{
@@ -48,10 +45,11 @@ export default function TotalBankCard() {
       alignItems: 'center',
       minWidth: '180px'
     }}>
-      <h2 style={{ fontSize: '1.1rem', marginBottom: '8px', color: '#374151' }}>Saldo Atual</h2>
-      <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#111827' }}>
-        {loading ? '...' : `R$ ${ultimoBalance?.toFixed(2) || '0.00'}`}
-      </p>
+      <h2 style={{ fontSize: '1.1rem', marginBottom: '8px', color: '#374151' }}>Total de reds</h2>
+      <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: total !== null ? (total >= 0 ? '#EF4444' : '#ef4444') : '#111827' }}>
+        {loading ? '...' : `${total}`}
+    </p>
+
     </div>
   )
 }
