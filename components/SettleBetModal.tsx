@@ -24,41 +24,53 @@ type SettleBetModalProps = {
 
 export default function SettleBetModal({ show, bet, onClose, onSaved }: SettleBetModalProps) {
   const [result, setResult] = useState<'green' | 'red'>('green')
-  const [returnedValue, setReturnedValue] = useState<number>(0)
+  const [returnedValue, setReturnedValue] = useState<string>('') // começa vazio
   const [percentage, setPercentage] = useState<number>(0)
 
   useEffect(() => {
     if (bet) {
-      setReturnedValue(bet.profit_loss || 0)
-      setPercentage(bet.stake ? ((bet.profit_loss || 0) / bet.stake) * 100 : 0)
+      setReturnedValue(
+        bet.profit_loss !== null && bet.profit_loss !== undefined
+          ? String(bet.profit_loss)
+          : ''
+      )
+      setPercentage(bet.stake && bet.profit_loss ? (bet.profit_loss / bet.stake) * 100 : 0)
       setResult('green')
     }
   }, [bet])
 
   useEffect(() => {
-    if (bet) {
-      setPercentage(bet.stake ? (returnedValue / bet.stake) * 100 : 0)
+    if (bet && returnedValue !== '') {
+      const numericValue = parseFloat(returnedValue)
+      setPercentage(bet.stake ? (numericValue / bet.stake) * 100 : 0)
     }
   }, [returnedValue, bet])
 
   if (!show || !bet) return null
 
   const handleSave = async () => {
+    if (returnedValue === '') {
+      alert('Preencha o valor retornado antes de salvar.')
+      return
+    }
+
+    const numericValue = parseFloat(returnedValue)
+
     // Atualiza a aposta
     await supabase
       .from('bets')
       .update({
         status: result,
-        profit_loss: returnedValue,
+        profit_loss: numericValue,
         percentage: percentage
       })
       .eq('id', bet.id)
 
-    // Atualiza o saldo da banca (somando ou subtraindo)
+    // Atualiza o saldo da banca
     const { data: balanceData } = await supabase.from('balance').select('*').limit(1)
     if (balanceData && balanceData.length > 0) {
       let currentBalance = balanceData[0].balance || 0
-      currentBalance += result === 'green' ? returnedValue : -returnedValue
+      currentBalance += result === 'green' ? numericValue : -numericValue
       await supabase.from('balance').update({ balance: currentBalance }).eq('id', balanceData[0].id)
     }
 
@@ -87,26 +99,27 @@ export default function SettleBetModal({ show, bet, onClose, onSaved }: SettleBe
           </select>
         </div>
 
-       <label>Valor Retornado</label>
-          <input
-            type="number" 
-            value={returnedValue}
-            onChange={(e) => {
-              const value = e.target.value;
-              setReturnedValue(value === '' ? 0 : parseFloat(value));
-            }}
-            style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #ccc' }}
-          />
+        <label>Valor Retornado</label>
+        <input
+          type="number" 
+          value={returnedValue}
+          onChange={(e) => setReturnedValue(e.target.value)}
+          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #ccc' }}
+        />
 
-          <div>
-            <label>Percentual (%)</label>
-            <input
-              type="number"
-              value={returnedValue >= 0 ? percentage.toFixed(2) : (percentage * -1).toFixed(2)}
-              readOnly
-              style={{ width:'100%', padding:'8px', borderRadius:'8px', border:'1px solid #ccc', background:'#f3f4f6' }}
-            />
-          </div>
+        <div>
+          <label>Percentual (%)</label>
+          <input
+            type="number"
+            value={returnedValue !== '' 
+              ? (parseFloat(returnedValue) >= 0 
+                  ? percentage.toFixed(2) 
+                  : (percentage * -1).toFixed(2)) 
+              : ''}
+            readOnly
+            style={{ width:'100%', padding:'8px', borderRadius:'8px', border:'1px solid #ccc', background:'#f3f4f6' }}
+          />
+        </div>
 
         <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
           <button onClick={onClose} style={{ padding:'10px 20px', borderRadius:'8px', backgroundColor:'#e5e7eb', border:'none', cursor:'pointer' }}>Cancelar</button>
