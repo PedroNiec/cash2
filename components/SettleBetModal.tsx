@@ -49,33 +49,33 @@ export default function SettleBetModal({ show, bet, onClose, onSaved }: SettleBe
   if (!show || !bet) return null
 
   const handleSave = async () => {
-    if (returnedValue === '') {
-      alert('Preencha o valor retornado antes de salvar.')
-      return
-    }
-
-    const numericValue = parseFloat(returnedValue)
-
-    // Atualiza a aposta
-    await supabase
-      .from('bets')
-      .update({
-        status: result,
-        profit_loss: numericValue,
-        percentage: percentage
-      })
-      .eq('id', bet.id)
-
-    // Atualiza o saldo da banca
-    const { data: balanceData } = await supabase.from('balance').select('*').limit(1)
-    if (balanceData && balanceData.length > 0) {
-      let currentBalance = balanceData[0].balance || 0
-      currentBalance += result === 'green' ? numericValue : -numericValue
-      await supabase.from('balance').update({ balance: currentBalance }).eq('id', balanceData[0].id)
-    }
-
-    onSaved()
+  if (returnedValue === '') {
+    alert('Preencha o valor retornado antes de salvar.')
+    return
   }
+
+  const numericValue = parseFloat(returnedValue)
+  const absValue = Math.abs(numericValue) // garante positivo
+
+  await supabase
+    .from('bets')
+    .update({
+      status: result,
+      profit_loss: result === 'green' ? absValue : -absValue,
+      percentage: percentage
+    })
+    .eq('id', bet.id)
+
+  const { data: balanceData } = await supabase.from('balance').select('*').limit(1)
+  if (balanceData && balanceData.length > 0) {
+    let currentBalance = balanceData[0].balance || 0
+    currentBalance += result === 'green' ? absValue : -absValue
+    await supabase.from('balance').update({ balance: currentBalance }).eq('id', balanceData[0].id)
+  }
+
+  onSaved()
+}
+
 
   return (
     <div style={{
