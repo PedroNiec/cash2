@@ -144,10 +144,34 @@ export default function ApostasPage() {
                   <td style={{ padding:'8px' }}>{championshipMap[bet.championship_id || 0] || '-'}</td>
                   <td style={{ padding:'8px' }}>{teamMap[bet.home_team_id || 0] || '-'}</td>
                   <td style={{ padding:'8px' }}>{teamMap[bet.away_team_id || 0] || '-'}</td>
-                  <td style={{ padding:'8px' }}>{bet.stake}</td>
-                  <td style={{ padding:'8px' }}>{bet.profit_loss}</td>
-                  <td style={{ padding:'8px' }}>{bet.percentage}</td>
-                  <td style={{ padding:'8px' }}>{bet.status}</td>
+                  <td style={{ padding:'8px' }}>R$ {bet.stake}</td>
+                  <td style={{ padding:'8px' }}>R$ {bet.profit_loss}</td>
+                  <td style={{ padding:'8px' }}>{bet.percentage} %</td>
+                  <td
+                    style={{
+                      padding: "8px",
+                      fontWeight: "bold",
+                      borderRadius:'6px',
+                      backgroundColor:
+                        bet.status === "green"
+                        ? "#00990D"
+                        : bet.status === "red"
+                        ? "#DC143C"
+                        : bet.status === "pending"
+                        ? "#FFA500"
+                        : "#000",
+                      textAlign: 'center',
+                      color: "#FFFAFA"
+                    }}
+                  >
+                    {bet.status === "green"
+                      ? "GREEN"
+                      : bet.status === "red"
+                      ? "RED"
+                      : bet.status === "pending"
+                      ? "PENDENTE"
+                      : bet.status}
+                  </td>
                   <td style={{ padding:'8px' }}>
                     {(!bet.status || bet.status === 'pending') && (
                       <button
