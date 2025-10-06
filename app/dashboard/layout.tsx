@@ -11,11 +11,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     { label: 'Geral', path: '/dashboard' },
     { label: 'Apostas', path: '/dashboard/apostas' },
     { label: 'Configurações', path: '/dashboard/configuracoes' },
+    // { label: 'Rotina', path: '/dashboard/rotina', readOnly: true },
   ]
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
-      {/* Sidebar */}
       <aside
         style={{
           width: '250px',
