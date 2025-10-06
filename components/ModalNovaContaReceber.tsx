@@ -48,7 +48,11 @@ export default function ModalNovaContaReceber({ supabase, onClose, onSaved }: Mo
 
         <div style={{ marginBottom:'10px' }}>
           <label>Categoria</label>
-          <input value={categoria} onChange={e=>setCategoria(e.target.value)} style={{ width:'100%', padding:'5px' }} />
+          <select value={categoria} onChange={e => setCategoria(e.target.value)} style={{ width:'100%', padding:'5px' }}>
+            <option>Recebimento</option>
+            <option>Rendimentos</option>
+            <option>Outros</option>
+          </select>
         </div>
 
         <div style={{ marginBottom:'10px' }}>
