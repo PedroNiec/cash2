@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import ModalNovaContaReceber from '@/components/ModalNovaContaReceber'
 import ModalReceberConta from '@/components/ModalReceberConta'
+import FiltrosContas from '@/components/FiltroContas'
 
 const supabaseUrl = 'https://ytiyrfliszifyuhghiqg.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0aXlyZmxpc3ppZnl1aGdoaXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzMTYzNjIsImV4cCI6MjA3Mzg5MjM2Mn0.DRmIJ0hee4kX7wdXt2OMXhaJ6-9RG6wL5FKZTw5hOz4'
@@ -23,18 +24,36 @@ export default function ContasAReceberPage() {
   const [contas, setContas] = useState<Conta[]>([])
   const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
-
   const [showReceberModal, setShowReceberModal] = useState(false)
   const [selectedConta, setSelectedConta] = useState<Conta | null>(null)
 
-  const fetchContas = async () => {
+  const [filtrosAtivos, setFiltrosAtivos] = useState({
+    status: 'Todos',
+    categoria: 'Todos',
+    dataInicio: '',
+    dataFim: '',
+    busca: ''
+  })
+
+  // Gera lista de categorias para o dropdown de filtro
+  const categorias = Array.from(new Set(contas.map(c => c.categoria)))
+
+  const fetchContas = async (filtros = filtrosAtivos) => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('contas_a_receber')
-      .select('*')
-      .order('data_entrada', { ascending: true })
+
+    let query = supabase.from('contas_a_receber').select('*').order('data_entrada', { ascending: true })
+
+    // Aplicar filtros
+    if (filtros.status !== 'Todos') query = query.eq('status', filtros.status)
+    if (filtros.categoria !== 'Todos') query = query.eq('categoria', filtros.categoria)
+    if (filtros.dataInicio) query = query.gte('data_entrada', filtros.dataInicio)
+    if (filtros.dataFim) query = query.lte('data_entrada', filtros.dataFim)
+    if (filtros.busca) query = query.ilike('descricao', `%${filtros.busca}%`)
+
+    const { data, error } = await query
     if (error) console.error(error)
     else setContas(data || [])
+
     setLoading(false)
   }
 
@@ -57,6 +76,21 @@ export default function ContasAReceberPage() {
     <div style={{ padding:'20px' }}>
       <h1 style={{ fontSize:'1.8rem', fontWeight:'bold', marginBottom:'10px' }}>Contas a Receber</h1>
 
+      {/* Filtros */}
+      <FiltrosContas
+        categorias={categorias}
+        onApply={(filtros) => {
+          setFiltrosAtivos(filtros)
+          fetchContas(filtros)
+        }}
+        onClear={() => {
+          const filtrosLimpos = { status:'Todos', categoria:'Todos', dataInicio:'', dataFim:'', busca:'' }
+          setFiltrosAtivos(filtrosLimpos)
+          fetchContas(filtrosLimpos)
+        }}
+      />
+
+      {/* Ações principais */}
       <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'20px', flexWrap:'wrap', gap:'10px' }}>
         <button
           onClick={() => setShowModal(true)}
@@ -65,13 +99,14 @@ export default function ContasAReceberPage() {
           Nova Conta
         </button>
         <button
-          onClick={fetchContas}
+          onClick={() => fetchContas(filtrosAtivos)}
           style={{ padding:'10px 20px', borderRadius:'8px', backgroundColor:'#64748b', color:'#fff', border:'none', cursor:'pointer' }}
         >
           Atualizar
         </button>
       </div>
 
+      {/* Tabela */}
       {loading ? (
         <p>Carregando...</p>
       ) : (
@@ -128,11 +163,12 @@ export default function ContasAReceberPage() {
         </div>
       )}
 
+      {/* Modais */}
       {showModal && (
         <ModalNovaContaReceber
           supabase={supabase}
           onClose={() => setShowModal(false)}
-          onSaved={fetchContas}
+          onSaved={() => fetchContas(filtrosAtivos)}
         />
       )}
 
@@ -141,10 +177,7 @@ export default function ContasAReceberPage() {
           supabase={supabase}
           conta={selectedConta}
           onClose={() => setShowReceberModal(false)}
-          onSaved={() => {
-            setShowReceberModal(false)
-            fetchContas()
-          }}
+          onSaved={() => fetchContas(filtrosAtivos)}
         />
       )}
 
