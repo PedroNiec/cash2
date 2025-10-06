@@ -2,15 +2,30 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import ModalNovaContaReceber from '@/components/ModalNovaContaReceber'
+import ModalReceberConta from '@/components/ModalReceberConta'
 
 const supabaseUrl = 'https://ytiyrfliszifyuhghiqg.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0aXlyZmxpc3ppZnl1aGdoaXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzMTYzNjIsImV4cCI6MjA3Mzg5MjM2Mn0.DRmIJ0hee4kX7wdXt2OMXhaJ6-9RG6wL5FKZTw5hOz4'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+type Conta = {
+  id: string
+  descricao: string
+  categoria: string
+  data_entrada: string
+  valor: number
+  status: string
+  observacoes: string | null
+}
 
 export default function ContasAReceberPage() {
-  const [contas, setContas] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [contas, setContas] = useState<Conta[]>([])
+  const [loading, setLoading] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+
+  const [showReceberModal, setShowReceberModal] = useState(false)
+  const [selectedConta, setSelectedConta] = useState<Conta | null>(null)
 
   const fetchContas = async () => {
     setLoading(true)
@@ -18,7 +33,6 @@ export default function ContasAReceberPage() {
       .from('contas_a_receber')
       .select('*')
       .order('data_entrada', { ascending: true })
-
     if (error) console.error(error)
     else setContas(data || [])
     setLoading(false)
@@ -29,48 +43,111 @@ export default function ContasAReceberPage() {
   }, [])
 
   const deleteConta = async (id: string) => {
-    const { error } = await supabase
-      .from('contas_a_receber')
-      .delete()
-      .eq('id', id)
+    const { error } = await supabase.from('contas_a_receber').delete().eq('id', id)
     if (error) console.error(error)
     else fetchContas()
   }
 
+  const handleReceber = (conta: Conta) => {
+    setSelectedConta(conta)
+    setShowReceberModal(true)
+  }
+
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Contas a Receber</h1>
+    <div style={{ padding:'20px' }}>
+      <h1 style={{ fontSize:'1.8rem', fontWeight:'bold', marginBottom:'10px' }}>Contas a Receber</h1>
+
+      <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'20px', flexWrap:'wrap', gap:'10px' }}>
+        <button
+          onClick={() => setShowModal(true)}
+          style={{ padding:'10px 20px', borderRadius:'8px', backgroundColor:'#4f46e5', color:'#fff', border:'none', cursor:'pointer' }}
+        >
+          Nova Conta
+        </button>
+        <button
+          onClick={fetchContas}
+          style={{ padding:'10px 20px', borderRadius:'8px', backgroundColor:'#64748b', color:'#fff', border:'none', cursor:'pointer' }}
+        >
+          Atualizar
+        </button>
+      </div>
+
       {loading ? (
         <p>Carregando...</p>
       ) : (
-        <table className="w-full border">
-          <thead>
-            <tr>
-              <th>Descrição</th>
-              <th>Categoria</th>
-              <th>Data de Entrada</th>
-              <th>Valor</th>
-              <th>Status</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {contas.map((c) => (
-              <tr key={c.id} className="border-t">
-                <td>{c.descricao}</td>
-                <td>{c.categoria}</td>
-                <td>{c.data_entrada}</td>
-                <td>R$ {c.valor}</td>
-                <td>{c.status}</td>
-                <td>
-                  <button onClick={() => deleteConta(c.id)} className="text-red-500">Excluir</button>
-                  {/* Futuramente editar */}
-                </td>
+        <div style={{ overflowX:'auto' }}>
+          <table style={{ width:'100%', borderCollapse:'collapse' }}>
+            <thead>
+              <tr>
+                {['Descrição','Categoria','Data Entrada','Valor','Status','Ações'].map(col => (
+                  <th key={col} style={{ borderBottom:'2px solid #ccc', padding:'10px', textAlign:'left', background:'#f3f4f6' }}>
+                    {col}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {contas.map(conta => (
+                <tr key={conta.id} style={{ borderBottom:'1px solid #ddd' }}>
+                  <td style={{ padding:'8px' }}>{conta.descricao}</td>
+                  <td style={{ padding:'8px' }}>{conta.categoria}</td>
+                  <td style={{ padding:'8px' }}>{conta.data_entrada}</td>
+                  <td style={{ padding:'8px' }}>R$ {conta.valor.toFixed(2)}</td>
+                  <td
+                    style={{
+                      padding:'8px',
+                      fontWeight:'bold',
+                      borderRadius:'6px',
+                      backgroundColor: conta.status === 'Pendente' ? '#FFA500' : '#10b981',
+                      color:'#fff',
+                      textAlign:'center'
+                    }}
+                  >
+                    {conta.status.toUpperCase()}
+                  </td>
+                  <td style={{ padding:'8px' }}>
+                    {conta.status === 'Pendente' && (
+                      <button
+                        onClick={() => handleReceber(conta)}
+                        style={{ padding:'5px 10px', borderRadius:'6px', backgroundColor:'#10b981', color:'#fff', border:'none', cursor:'pointer', marginRight:'5px' }}
+                      >
+                        Receber
+                      </button>
+                    )}
+                    <button
+                      onClick={() => deleteConta(conta.id)}
+                      style={{ padding:'5px 10px', borderRadius:'6px', backgroundColor:'#f87171', color:'#fff', border:'none', cursor:'pointer' }}
+                    >
+                      Excluir
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
+
+      {showModal && (
+        <ModalNovaContaReceber
+          supabase={supabase}
+          onClose={() => setShowModal(false)}
+          onSaved={fetchContas}
+        />
+      )}
+
+      {showReceberModal && selectedConta && (
+        <ModalReceberConta
+          supabase={supabase}
+          conta={selectedConta}
+          onClose={() => setShowReceberModal(false)}
+          onSaved={() => {
+            setShowReceberModal(false)
+            fetchContas()
+          }}
+        />
+      )}
+
     </div>
   )
 }
