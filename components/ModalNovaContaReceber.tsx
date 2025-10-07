@@ -21,7 +21,7 @@ export default function ModalNovaContaReceber({ supabase, onClose, onSaved }: Mo
     const { error } = await supabase.from('contas_a_receber').insert([{
       descricao,
       categoria,
-      data_entrada: dataEntrada,
+      data_vencimento: dataEntrada,
       valor: parseFloat(valor),
       observacoes
     }])
@@ -56,7 +56,7 @@ export default function ModalNovaContaReceber({ supabase, onClose, onSaved }: Mo
         </div>
 
         <div style={{ marginBottom:'10px' }}>
-          <label>Data de Entrada</label>
+          <label>Data de Vencimento</label>
           <input type="date" value={dataEntrada} onChange={e=>setDataEntrada(e.target.value)} style={{ width:'100%', padding:'5px' }} />
         </div>
 

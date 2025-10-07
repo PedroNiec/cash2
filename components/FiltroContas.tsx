@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 interface FiltroProps {
   categorias: string[]
@@ -13,6 +13,23 @@ interface FiltroProps {
   }) => void
   onClear: () => void
 }
+
+// Componente auxiliar fora do return
+const Campo = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', minWidth: '140px' }}>
+    <label
+      style={{
+        marginBottom: '6px',
+        fontSize: '14px',
+        fontWeight: 500,
+        color: '#374151',
+      }}
+    >
+      {label}
+    </label>
+    {children}
+  </div>
+)
 
 export default function FiltrosContas({ categorias, onApply, onClear }: FiltroProps) {
   const [status, setStatus] = useState('Todos')
@@ -35,77 +52,133 @@ export default function FiltrosContas({ categorias, onApply, onClear }: FiltroPr
   }
 
   return (
-    <div style={{ display:'flex', flexWrap:'wrap', gap:'10px', marginBottom:'20px', alignItems:'flex-end' }}>
-      {/* Status */}
-      <div>
-        <label>Status</label>
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '16px',
+        marginBottom: '24px',
+        alignItems: 'flex-end',
+        backgroundColor: '#f9fafb',
+        padding: '16px',
+        borderRadius: '10px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+      }}
+    >
+      <Campo label="Status">
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          style={{ padding:'5px', borderRadius:'6px', border:'1px solid #ccc', minWidth:'120px' }}
+          style={{
+            padding: '8px',
+            borderRadius: '8px',
+            border: '1px solid #d1d5db',
+            fontSize: '14px',
+          }}
         >
-          {['Todos','Pendente','Pago'].map(s => <option key={s} value={s}>{s}</option>)}
+          {['Todos', 'Pendente', 'Pago'].map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
         </select>
-      </div>
+      </Campo>
 
-      {/* Categoria */}
-      <div>
-        <label>Categoria</label>
+      <Campo label="Categoria">
         <select
           value={categoria}
           onChange={(e) => setCategoria(e.target.value)}
-          style={{ padding:'5px', borderRadius:'6px', border:'1px solid #ccc', minWidth:'140px' }}
+          style={{
+            padding: '8px',
+            borderRadius: '8px',
+            border: '1px solid #d1d5db',
+            fontSize: '14px',
+          }}
         >
           <option value="Todos">Todos</option>
-          {categorias.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+          {categorias.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
         </select>
-      </div>
+      </Campo>
 
-      {/* Data início */}
-      <div>
-        <label>De</label>
+      <Campo label="De">
         <input
           type="date"
           value={dataInicio}
           onChange={(e) => setDataInicio(e.target.value)}
-          style={{ padding:'5px', borderRadius:'6px', border:'1px solid #ccc' }}
+          style={{
+            padding: '8px',
+            borderRadius: '8px',
+            border: '1px solid #d1d5db',
+            fontSize: '14px',
+          }}
         />
-      </div>
+      </Campo>
 
-      {/* Data fim */}
-      <div>
-        <label>Até</label>
+      <Campo label="Até">
         <input
           type="date"
           value={dataFim}
           onChange={(e) => setDataFim(e.target.value)}
-          style={{ padding:'5px', borderRadius:'6px', border:'1px solid #ccc' }}
+          style={{
+            padding: '8px',
+            borderRadius: '8px',
+            border: '1px solid #d1d5db',
+            fontSize: '14px',
+          }}
         />
-      </div>
+      </Campo>
 
-      {/* Busca */}
-      <div>
-        <label>Descrição</label>
+      <Campo label="Descrição">
         <input
           type="text"
           placeholder="Buscar..."
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
-          style={{ padding:'5px', borderRadius:'6px', border:'1px solid #ccc', minWidth:'140px' }}
+          style={{
+            padding: '8px',
+            borderRadius: '8px',
+            border: '1px solid #d1d5db',
+            fontSize: '14px',
+          }}
         />
-      </div>
+      </Campo>
 
-      {/* Botões */}
-      <div style={{ display:'flex', gap:'10px' }}>
+      <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
         <button
           onClick={handleApply}
-          style={{ padding:'6px 12px', borderRadius:'6px', border:'none', backgroundColor:'#10b981', color:'#fff', cursor:'pointer' }}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '8px',
+            border: 'none',
+            backgroundColor: '#10b981',
+            color: '#fff',
+            fontWeight: 500,
+            cursor: 'pointer',
+            transition: 'background-color 0.2s',
+          }}
+          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#059669')}
+          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#10b981')}
         >
           Aplicar
         </button>
         <button
           onClick={handleClear}
-          style={{ padding:'6px 12px', borderRadius:'6px', border:'none', backgroundColor:'#64748b', color:'#fff', cursor:'pointer' }}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '8px',
+            border: 'none',
+            backgroundColor: '#6b7280',
+            color: '#fff',
+            fontWeight: 500,
+            cursor: 'pointer',
+            transition: 'background-color 0.2s',
+          }}
+          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
+          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#6b7280')}
         >
           Limpar
         </button>

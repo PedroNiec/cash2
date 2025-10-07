@@ -14,7 +14,7 @@ type Conta = {
   id: string
   descricao: string
   categoria: string
-  data_entrada: string
+  data_vencimento: string
   valor: number
   status: string
   observacoes: string | null
@@ -41,13 +41,13 @@ export default function ContasAReceberPage() {
   const fetchContas = async (filtros = filtrosAtivos) => {
     setLoading(true)
 
-    let query = supabase.from('contas_a_receber').select('*').order('data_entrada', { ascending: true })
+    let query = supabase.from('contas_a_receber').select('*').order('data_vencimento', { ascending: true })
 
     // Aplicar filtros
     if (filtros.status !== 'Todos') query = query.eq('status', filtros.status)
     if (filtros.categoria !== 'Todos') query = query.eq('categoria', filtros.categoria)
-    if (filtros.dataInicio) query = query.gte('data_entrada', filtros.dataInicio)
-    if (filtros.dataFim) query = query.lte('data_entrada', filtros.dataFim)
+    if (filtros.dataInicio) query = query.gte('data_vencimento', filtros.dataInicio)
+    if (filtros.dataFim) query = query.lte('data_vencimento', filtros.dataFim)
     if (filtros.busca) query = query.ilike('descricao', `%${filtros.busca}%`)
 
     const { data, error } = await query
@@ -114,7 +114,7 @@ export default function ContasAReceberPage() {
           <table style={{ width:'100%', borderCollapse:'collapse' }}>
             <thead>
               <tr>
-                {['Descrição','Categoria','Data Entrada','Valor','Status','Ações'].map(col => (
+                {['Descrição','Categoria','Data Vencimento','Valor','Status','Ações'].map(col => (
                   <th key={col} style={{ borderBottom:'2px solid #ccc', padding:'10px', textAlign:'left', background:'#f3f4f6' }}>
                     {col}
                   </th>
@@ -126,7 +126,7 @@ export default function ContasAReceberPage() {
                 <tr key={conta.id} style={{ borderBottom:'1px solid #ddd' }}>
                   <td style={{ padding:'8px' }}>{conta.descricao}</td>
                   <td style={{ padding:'8px' }}>{conta.categoria}</td>
-                  <td style={{ padding:'8px' }}>{conta.data_entrada}</td>
+                  <td style={{ padding:'8px' }}>{conta.data_vencimento}</td>
                   <td style={{ padding:'8px' }}>R$ {conta.valor.toFixed(2)}</td>
                   <td
                     style={{

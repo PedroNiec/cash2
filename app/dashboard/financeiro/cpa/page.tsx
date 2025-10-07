@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import ModalNovaConta from '@/components/ModalNovaConta'
 import ModalPagarConta from '@/components/ModalPagarConta'  
+import FiltrosContas from '@/components/FiltroContas'
 
 const supabaseUrl = 'https://ytiyrfliszifyuhghiqg.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0aXlyZmxpc3ppZnl1aGdoaXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzMTYzNjIsImV4cCI6MjA3Mzg5MjM2Mn0.DRmIJ0hee4kX7wdXt2OMXhaJ6-9RG6wL5FKZTw5hOz4'
@@ -28,16 +29,36 @@ export default function ContasAPagarPage() {
   const [showReceberModal, setShowReceberModal] = useState(false)
   const [selectedConta, setSelectedConta] = useState<Conta | null>(null)
 
+    const [filtrosAtivos, setFiltrosAtivos] = useState({
+    status: 'Todos',
+    categoria: 'Todos',
+    dataInicio: '',
+    dataFim: '',
+    busca: ''
+  })
 
-  const fetchContas = async () => {
+  const categorias = Array.from(new Set(contas.map(c => c.categoria)))
+
+
+
+  const fetchContas = async (filtros = filtrosAtivos) => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('contas_a_pagar')
-      .select('*')
-      .order('data_vencimento', { ascending: true })
+
+    let query = supabase.from('contas_a_pagar').select('*').order('data_vencimento', { ascending: true })
+
+
+      // Aplicar filtros
+    if (filtros.status !== 'Todos') query = query.eq('status', filtros.status)
+    if (filtros.categoria !== 'Todos') query = query.eq('categoria', filtros.categoria)
+    if (filtros.dataInicio) query = query.gte('data_vencimento', filtros.dataInicio)
+    if (filtros.dataFim) query = query.lte('data_vencimento', filtros.dataFim)
+    if (filtros.busca) query = query.ilike('descricao', `%${filtros.busca}%`)
+
+    const { data, error } = await query
     if (error) console.error(error)
     else setContas(data || [])
-    setLoading(false)
+
+     setLoading(false)
   }
 
   useEffect(() => {
@@ -58,6 +79,20 @@ export default function ContasAPagarPage() {
   return (
     <div style={{ padding:'20px' }}>
       <h1 style={{ fontSize:'1.8rem', fontWeight:'bold', marginBottom:'10px' }}>Contas a Pagar</h1>
+
+      {/* Filtros */}
+            <FiltrosContas
+              categorias={categorias}
+              onApply={(filtros) => {
+                setFiltrosAtivos(filtros)
+                fetchContas(filtros)
+              }}
+              onClear={() => {
+                const filtrosLimpos = { status:'Todos', categoria:'Todos', dataInicio:'', dataFim:'', busca:'' }
+                setFiltrosAtivos(filtrosLimpos)
+                fetchContas(filtrosLimpos)
+              }}
+            />
   
       <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'20px', flexWrap:'wrap', gap:'10px' }}>
         <button
@@ -67,7 +102,7 @@ export default function ContasAPagarPage() {
           Nova Conta
         </button>
         <button
-          onClick={fetchContas}
+          onClick={() => fetchContas(filtrosAtivos)}
           style={{ padding:'10px 20px', borderRadius:'8px', backgroundColor:'#64748b', color:'#fff', border:'none', cursor:'pointer' }}
         >
           Atualizar

@@ -12,7 +12,7 @@ interface ModalProps {
 export default function ModalReceberConta({ supabase, conta, onClose, onSaved }: ModalProps) {
   const [valorRecebido, setValorRecebido] = useState(conta.valor)
   const [dataRecebimento, setDataRecebimento] = useState(new Date().toISOString().split('T')[0])
-  const [formaPagamento, setFormaPagamento] = useState('Dinheiro') // padrão
+  const [formaRecebimento, setFormaRecebimento] = useState('Dinheiro') // padrão
   const [observacoes, setObservacoes] = useState(conta.observacoes || '')
   const [loading, setLoading] = useState(false)
 
@@ -22,9 +22,9 @@ export default function ModalReceberConta({ supabase, conta, onClose, onSaved }:
       .from('contas_a_receber')
       .update({
         valor: parseFloat(valorRecebido),
-        data_entrada: dataRecebimento,
+        data_vencimento: dataRecebimento,
         status: 'Recebido',
-        forma_pagamento: formaPagamento,
+        forma_recebimento: formaRecebimento,
         observacoes,
       })
       .eq('id', conta.id)
@@ -62,8 +62,8 @@ export default function ModalReceberConta({ supabase, conta, onClose, onSaved }:
         </div>
 
         <div style={{ marginBottom:'10px' }}>
-          <label>Forma de Pagamento</label>
-          <select value={formaPagamento} onChange={e => setFormaPagamento(e.target.value)} style={{ width:'100%', padding:'5px' }}>
+          <label>Forma de Recebimento</label>
+          <select value={formaRecebimento} onChange={e => setFormaRecebimento(e.target.value)} style={{ width:'100%', padding:'5px' }}>
             <option>Dinheiro</option>
             <option>Pix</option>
             <option>Boleto</option>
