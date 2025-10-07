@@ -35,7 +35,6 @@ export default function ContasAReceberPage() {
     busca: ''
   })
 
-  // Gera lista de categorias para o dropdown de filtro
   const categorias = Array.from(new Set(contas.map(c => c.categoria)))
 
   const fetchContas = async (filtros = filtrosAtivos) => {
@@ -43,7 +42,6 @@ export default function ContasAReceberPage() {
 
     let query = supabase.from('contas_a_receber').select('*').order('data_vencimento', { ascending: true })
 
-    // Aplicar filtros
     if (filtros.status !== 'Todos') query = query.eq('status', filtros.status)
     if (filtros.categoria !== 'Todos') query = query.eq('categoria', filtros.categoria)
     if (filtros.dataInicio) query = query.gte('data_vencimento', filtros.dataInicio)
@@ -72,11 +70,16 @@ export default function ContasAReceberPage() {
     setShowReceberModal(true)
   }
 
+  const formatarDataBR = (data: string) => {
+    const [ano, mes, dia] = data.split('-')
+    return `${dia}/${mes}/${ano}`
+  }
+  
+
   return (
     <div style={{ padding:'20px' }}>
       <h1 style={{ fontSize:'1.8rem', fontWeight:'bold', marginBottom:'10px' }}>Contas a Receber</h1>
 
-      {/* Filtros */}
       <FiltrosContas
         categorias={categorias}
         onApply={(filtros) => {
@@ -90,7 +93,6 @@ export default function ContasAReceberPage() {
         }}
       />
 
-      {/* Ações principais */}
       <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'20px', flexWrap:'wrap', gap:'10px' }}>
         <button
           onClick={() => setShowModal(true)}
@@ -106,7 +108,6 @@ export default function ContasAReceberPage() {
         </button>
       </div>
 
-      {/* Tabela */}
       {loading ? (
         <p>Carregando...</p>
       ) : (
@@ -126,7 +127,9 @@ export default function ContasAReceberPage() {
                 <tr key={conta.id} style={{ borderBottom:'1px solid #ddd' }}>
                   <td style={{ padding:'8px' }}>{conta.descricao}</td>
                   <td style={{ padding:'8px' }}>{conta.categoria}</td>
-                  <td style={{ padding:'8px' }}>{conta.data_vencimento}</td>
+                  <td style={{ padding: '8px' }}>
+                    {conta.data_vencimento ? formatarDataBR(conta.data_vencimento) : '-'}
+                  </td>
                   <td style={{ padding:'8px' }}>R$ {conta.valor.toFixed(2)}</td>
                   <td
                     style={{
@@ -163,7 +166,6 @@ export default function ContasAReceberPage() {
         </div>
       )}
 
-      {/* Modais */}
       {showModal && (
         <ModalNovaContaReceber
           supabase={supabase}

@@ -47,7 +47,6 @@ export default function ContasAPagarPage() {
     let query = supabase.from('contas_a_pagar').select('*').order('data_vencimento', { ascending: true })
 
 
-      // Aplicar filtros
     if (filtros.status !== 'Todos') query = query.eq('status', filtros.status)
     if (filtros.categoria !== 'Todos') query = query.eq('categoria', filtros.categoria)
     if (filtros.dataInicio) query = query.gte('data_vencimento', filtros.dataInicio)
@@ -74,6 +73,11 @@ export default function ContasAPagarPage() {
   const handlePagar = (conta: Conta) => {
     setSelectedConta(conta)
     setShowReceberModal(true)
+  }
+
+  const formatarDataBR = (data: string) => {
+    const [ano, mes, dia] = data.split('-')
+    return `${dia}/${mes}/${ano}`
   }
 
   return (
@@ -128,7 +132,9 @@ export default function ContasAPagarPage() {
                 <tr key={conta.id} style={{ borderBottom:'1px solid #ddd' }}>
                   <td style={{ padding:'8px' }}>{conta.descricao}</td>
                   <td style={{ padding:'8px' }}>{conta.categoria}</td>
-                  <td style={{ padding:'8px' }}>{conta.data_vencimento}</td>
+                  <td style={{ padding: '8px' }}>
+                    {conta.data_vencimento ? formatarDataBR(conta.data_vencimento) : '-'}
+                  </td>
                   <td style={{ padding:'8px' }}>R$ {conta.valor.toFixed(2)}</td>
                   <td
                     style={{
