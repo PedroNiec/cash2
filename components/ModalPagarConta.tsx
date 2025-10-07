@@ -1,10 +1,22 @@
 'use client'
 
 import { useState } from 'react'
+import { SupabaseClient } from '@supabase/supabase-js' // Importe o tipo SupabaseClient
+
+type Conta = {
+  id: string
+  descricao: string
+  categoria: string
+  data_vencimento: string
+  valor: number
+  status: string
+  forma_pagamento: string | null
+  observacoes: string | null
+}
 
 interface ModalProps {
-  supabase: any
-  conta: any
+  supabase: SupabaseClient
+  conta: Conta
   onClose: () => void
   onSaved: () => void
 }
@@ -22,7 +34,7 @@ export default function ModalPagarConta({ supabase, conta, onClose, onSaved }: M
     const { error } = await supabase
       .from('contas_a_pagar')
       .update({
-        valor: parseFloat(valorPago),
+        valor: valorPago,
         data_pagamento: dataPagamento,
         forma_pagamento: formaPagamento,
         status: 'Pago',
@@ -74,7 +86,7 @@ export default function ModalPagarConta({ supabase, conta, onClose, onSaved }: M
             type="number"
             step="0.01"
             value={valorPago}
-            onChange={(e) => setValorPago(e.target.value)}
+            onChange={(e) => setValorPago(valorPago)}
             style={{ width: '100%', padding: '5px', background:'#FFFFFF', color:'#111827' }}
           />
         </div>

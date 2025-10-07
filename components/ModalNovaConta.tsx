@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { SupabaseClient } from '@supabase/supabase-js' // Importe o tipo SupabaseClient
+
 
 interface ModalProps {
   onClose: () => void
   onSaved: () => void
-  supabase: any
+  supabase: SupabaseClient
 }
 
 export default function ModalNovaConta({ onClose, onSaved, supabase }: ModalProps) {

@@ -1,10 +1,22 @@
 'use client'
 
 import { useState } from 'react'
+import { SupabaseClient } from '@supabase/supabase-js'
+
+type Conta = {
+  id: string
+  descricao: string
+  categoria: string
+  data_vencimento: string
+  valor: number
+  status: string
+  forma_pagamento: string | null
+  observacoes: string | null
+}
 
 interface ModalProps {
-  supabase: any
-  conta: any
+  supabase: SupabaseClient
+  conta: Conta
   onClose: () => void
   onSaved: () => void
 }
@@ -21,7 +33,7 @@ export default function ModalReceberConta({ supabase, conta, onClose, onSaved }:
     const { error } = await supabase
       .from('contas_a_receber')
       .update({
-        valor: parseFloat(valorRecebido),
+        valor: valorRecebido,
         data_vencimento: dataRecebimento,
         status: 'Recebido',
         forma_recebimento: formaRecebimento,
@@ -53,7 +65,7 @@ export default function ModalReceberConta({ supabase, conta, onClose, onSaved }:
 
         <div style={{ marginBottom:'10px' }}>
           <label>Valor Recebido (R$)</label>
-          <input type="number" step="0.01" value={valorRecebido} onChange={e=>setValorRecebido(e.target.value)} style={{ width:'100%', padding:'5px' }} />
+          <input type="number" step="0.01" value={valorRecebido} onChange={e=>setValorRecebido(valorRecebido)} style={{ width:'100%', padding:'5px' }} />
         </div>
 
         <div style={{ marginBottom:'10px' }}>

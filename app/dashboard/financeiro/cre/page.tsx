@@ -17,6 +17,7 @@ type Conta = {
   data_vencimento: string
   valor: number
   status: string
+  forma_pagamento: string | null
   observacoes: string | null
 }
 

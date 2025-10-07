@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { SupabaseClient } from '@supabase/supabase-js' // Importe o tipo SupabaseClient
+
 
 interface ModalProps {
-  supabase: any
+  supabase: SupabaseClient
   onClose: () => void
   onSaved: () => void
 }
