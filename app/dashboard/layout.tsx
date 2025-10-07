@@ -12,6 +12,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     { label: 'Apostas', path: '/dashboard/apostas' },
     { label: 'Configurações', path: '/dashboard/configuracoes' },
     // { label: 'Rotina', path: '/dashboard/rotina'},
+    { label: 'Trade', path: '/dashboard/trade/simulador'},
   ]
 
   return (
