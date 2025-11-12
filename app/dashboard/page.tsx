@@ -8,12 +8,16 @@ import TotalRedsCard from '@/components/TotalRedsBets'
 
 
 export default function DashboardPage() {
-  return (
+ return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-      gap: '20px',
-      padding: '20px'
+      gridTemplateColumns: 'repeat(auto-fit, 220px)',
+      gap: '24px',
+      justifyContent: 'center',
+      padding: '40px 20px',
+      maxWidth: '1400px',
+      margin: '0 auto',
+      minHeight: 'calc(100vh - 100px)'
     }}>
       <TotalBetsCard />
       <ProfitLossCard />
