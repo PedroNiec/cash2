@@ -3,7 +3,7 @@
 import { ReactNode, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronDown, ChevronUp, Home, BarChart3, Settings, Clock, DollarSign, FileText, TrendingUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, Home, BarChart3, Settings, Clock, DollarSign, FileText, TrendingUp, Cone, AlarmCheck } from 'lucide-react'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
@@ -15,7 +15,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     { label: 'Apostas', path: '/dashboard/apostas', icon: BarChart3 },
     { label: 'Configurações', path: '/dashboard/configuracoes', icon: Settings },
     { label: 'Rotina', path: '/dashboard/rotina', icon: Clock },
-    { label: 'Trade', path: '/dashboard/trade/simulador', icon: TrendingUp },
+    { label: 'Fechamento', path: '/dashboard/fecharDia', icon: TrendingUp },
+    { label: 'Tarefas', path: '/dashboard/tarefas', icon: AlarmCheck },
   ]
 
   const financeiroSubItems = [
