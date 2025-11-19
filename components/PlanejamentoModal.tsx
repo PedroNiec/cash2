@@ -281,7 +281,6 @@ export default function PlanejamentoModal({ open, planejamentoId, onClose, onSav
         flexDirection: 'column',
         boxShadow: '0 25px 50px rgba(0, 0, 0, 0.7)'
       }}>
-        {/* Header */}
         <div style={{
           padding: '24px',
           borderBottom: '1px solid rgba(75, 85, 99, 0.3)',
@@ -322,7 +321,6 @@ export default function PlanejamentoModal({ open, planejamentoId, onClose, onSav
           </button>
         </div>
 
-        {/* Body */}
         <div style={{
           padding: '24px',
           overflowY: 'auto',
@@ -345,7 +343,6 @@ export default function PlanejamentoModal({ open, planejamentoId, onClose, onSav
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {/* Error Message */}
               {error && (
                 <div style={{
                   background: 'rgba(239, 68, 68, 0.2)',
@@ -362,7 +359,6 @@ export default function PlanejamentoModal({ open, planejamentoId, onClose, onSav
                 </div>
               )}
 
-              {/* Planejamento Info */}
               <div style={{
                 background: 'rgba(31, 41, 55, 0.5)',
                 border: '1px solid rgba(75, 85, 99, 0.3)',
@@ -445,7 +441,6 @@ export default function PlanejamentoModal({ open, planejamentoId, onClose, onSav
                     />
                   </div>
 
-                  {/* Progress Info */}
                   {tasks.length > 0 && (
                     <div style={{
                       background: 'rgba(17, 24, 39, 0.6)',
@@ -491,7 +486,6 @@ export default function PlanejamentoModal({ open, planejamentoId, onClose, onSav
                 </div>
               </div>
 
-              {/* Tasks Section */}
               <div style={{
                 background: 'rgba(31, 41, 55, 0.5)',
                 border: '1px solid rgba(75, 85, 99, 0.3)',
@@ -583,7 +577,6 @@ export default function PlanejamentoModal({ open, planejamentoId, onClose, onSav
                             gap: '12px',
                             alignItems: 'flex-start'
                           }}>
-                            {/* Checkbox */}
                             <button
                               onClick={() => updateTask(index, "completed", !task.completed)}
                               disabled={saving}
@@ -606,7 +599,6 @@ export default function PlanejamentoModal({ open, planejamentoId, onClose, onSav
                               {task.completed && <CheckSquare size={16} style={{ color: '#fff' }} />}
                             </button>
 
-                            {/* Task Content */}
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                               <input
                                 value={task.title}
@@ -713,7 +705,6 @@ export default function PlanejamentoModal({ open, planejamentoId, onClose, onSav
           )}
         </div>
 
-        {/* Footer */}
         <div style={{
           padding: '20px 24px',
           borderTop: '1px solid rgba(75, 85, 99, 0.3)',

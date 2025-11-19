@@ -49,7 +49,6 @@ export default function PlanejamentoGrid({ reload, onEdit, filtros }: Props) {
         `)
         .order("date", { ascending: false });
 
-      // Aplicar filtros
       if (filtros) {
         if (filtros.status !== 'Todos') {
           query = query.eq('status', filtros.status);
@@ -69,7 +68,6 @@ export default function PlanejamentoGrid({ reload, onEdit, filtros }: Props) {
 
       if (planningError) throw planningError;
 
-      // Buscar estatísticas de tarefas para cada planejamento
       const planejamentosComStats = await Promise.all(
         (data || []).map(async (plan) => {
           const { data: tasks, error: tasksError } = await supabase
@@ -262,7 +260,6 @@ export default function PlanejamentoGrid({ reload, onEdit, filtros }: Props) {
                   animationDelay: `${index * 100}ms`
                 }}
               >
-                {/* Header do Card */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -298,7 +295,6 @@ export default function PlanejamentoGrid({ reload, onEdit, filtros }: Props) {
                   </span>
                 </div>
 
-                {/* Info do Card */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -332,7 +328,6 @@ export default function PlanejamentoGrid({ reload, onEdit, filtros }: Props) {
                     </span>
                   </div>
 
-                  {/* Barra de Progresso */}
                   <div style={{ marginTop: '8px' }}>
                     <div style={{
                       display: 'flex',

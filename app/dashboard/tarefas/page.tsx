@@ -74,7 +74,6 @@ export default function TarefasPage() {
         .slide-down { animation: slideDown 0.3s ease-out forwards; }
       `}</style>
 
-      {/* Header */}
       <div style={{ marginBottom: '32px' }} className="fade-in">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
           <Calendar size={40} style={{ color: '#8b5cf6' }} />
@@ -92,7 +91,6 @@ export default function TarefasPage() {
         </p>
       </div>
 
-      {/* Action Buttons */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
         <button
           onClick={handleOpenNew}
@@ -182,7 +180,6 @@ export default function TarefasPage() {
         </button>
       </div>
 
-      {/* Filtros Panel */}
       {showFiltros && (
         <div className="slide-down" style={{
           marginBottom: '24px',
@@ -331,10 +328,8 @@ export default function TarefasPage() {
         </div>
       )}
 
-      {/* Grid */}
       <PlanejamentoGrid reload={reload} onEdit={handleOpenEdit} filtros={filtros} />
 
-      {/* Modal */}
       <PlanejamentoModal
         open={openModal}
         planejamentoId={selectedPlanejamento}
