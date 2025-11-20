@@ -1,6 +1,7 @@
+
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { X, Calendar, Trophy, Home, Users, DollarSign, Search } from 'lucide-react'
 
@@ -29,8 +30,21 @@ type BetModalProps = {
 }
 
 export default function BetModal({ show, onClose, onSave, editingBet }: BetModalProps) {
-  const now = new Date()
-  const formattedDate = now.toISOString().slice(0, 16)
+  // Função para obter data/hora em horário de Brasília
+  const getBrasiliaDateTime = () => {
+    const now = new Date()
+    // Converte para horário de Brasília (UTC-3)
+    const brasiliaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+    // Formata para datetime-local (YYYY-MM-DDTHH:mm)
+    const year = brasiliaTime.getFullYear()
+    const month = String(brasiliaTime.getMonth() + 1).padStart(2, '0')
+    const day = String(brasiliaTime.getDate()).padStart(2, '0')
+    const hours = String(brasiliaTime.getHours()).padStart(2, '0')
+    const minutes = String(brasiliaTime.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  }
+
+  const formattedDate = getBrasiliaDateTime()
 
   const [form, setForm] = useState({
     date: formattedDate,
@@ -47,18 +61,28 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
   const [championships, setChampionships] = useState<{ id: number; name: string }[]>([])
   const [champSearch, setChampSearch] = useState('')
   const [showChampDropdown, setShowChampDropdown] = useState(false)
+  const [champSelectedIndex, setChampSelectedIndex] = useState(-1)
 
   const [teams, setTeams] = useState<{ id: number; name: string }[]>([])
   const [teamSearchHome, setTeamSearchHome] = useState('')
   const [teamSearchAway, setTeamSearchAway] = useState('')
   const [showHomeDropdown, setShowHomeDropdown] = useState(false)
   const [showAwayDropdown, setShowAwayDropdown] = useState(false)
+  const [homeSelectedIndex, setHomeSelectedIndex] = useState(-1)
+  const [awaySelectedIndex, setAwaySelectedIndex] = useState(-1)
 
   const [markets, setMarkets] = useState<{ id: number; name: string }[]>([])
   const [marketSearch, setMarketSearch] = useState('')
   const [showMarketDropdown, setShowMarketDropdown] = useState(false)
+  const [marketSelectedIndex, setMarketSelectedIndex] = useState(-1)
 
   const [hoveredBtn, setHoveredBtn] = useState<'save' | 'cancel' | null>(null)
+
+  // Refs para os dropdowns
+  const marketListRef = useRef<HTMLUListElement>(null)
+  const champListRef = useRef<HTMLUListElement>(null)
+  const homeListRef = useRef<HTMLUListElement>(null)
+  const awayListRef = useRef<HTMLUListElement>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,7 +122,7 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
 
   const resetForm = () => {
     setForm({
-      date: formattedDate,
+      date: getBrasiliaDateTime(),
       market_id: '', championship_id: '', home_team_id: '', away_team_id: '',
       stake: '', profit_loss: '', percentage: '', status: 'pending'
     })
@@ -128,9 +152,121 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
     onSave()
   }
 
+  // Funções para navegação por teclado
+  const handleMarketKeyDown = (e: React.KeyboardEvent) => {
+    const filteredMarkets = markets.filter(m => m.name.toLowerCase().includes(marketSearch.toLowerCase()))
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setMarketSelectedIndex(prev => (prev < filteredMarkets.length - 1 ? prev + 1 : prev))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setMarketSelectedIndex(prev => (prev > 0 ? prev - 1 : -1))
+    } else if (e.key === 'Enter' && marketSelectedIndex >= 0) {
+      e.preventDefault()
+      const selected = filteredMarkets[marketSelectedIndex]
+      setForm({ ...form, market_id: selected.id.toString() })
+      setMarketSearch(selected.name)
+      setShowMarketDropdown(false)
+      setMarketSelectedIndex(-1)
+    }
+  }
+
+  const handleChampKeyDown = (e: React.KeyboardEvent) => {
+    const filteredChamps = championships.filter(c => c.name.toLowerCase().includes(champSearch.toLowerCase()))
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setChampSelectedIndex(prev => (prev < filteredChamps.length - 1 ? prev + 1 : prev))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setChampSelectedIndex(prev => (prev > 0 ? prev - 1 : -1))
+    } else if (e.key === 'Enter' && champSelectedIndex >= 0) {
+      e.preventDefault()
+      const selected = filteredChamps[champSelectedIndex]
+      setForm({ ...form, championship_id: selected.id.toString() })
+      setChampSearch(selected.name)
+      setShowChampDropdown(false)
+      setChampSelectedIndex(-1)
+    }
+  }
+
+  const handleHomeKeyDown = (e: React.KeyboardEvent) => {
+    const filteredTeams = teams.filter(t => t.name.toLowerCase().includes(teamSearchHome.toLowerCase()))
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setHomeSelectedIndex(prev => (prev < filteredTeams.length - 1 ? prev + 1 : prev))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setHomeSelectedIndex(prev => (prev > 0 ? prev - 1 : -1))
+    } else if (e.key === 'Enter' && homeSelectedIndex >= 0) {
+      e.preventDefault()
+      const selected = filteredTeams[homeSelectedIndex]
+      setForm({ ...form, home_team_id: selected.id.toString() })
+      setTeamSearchHome(selected.name)
+      setShowHomeDropdown(false)
+      setHomeSelectedIndex(-1)
+    }
+  }
+
+  const handleAwayKeyDown = (e: React.KeyboardEvent) => {
+    const filteredTeams = teams.filter(t => t.name.toLowerCase().includes(teamSearchAway.toLowerCase()))
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setAwaySelectedIndex(prev => (prev < filteredTeams.length - 1 ? prev + 1 : prev))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setAwaySelectedIndex(prev => (prev > 0 ? prev - 1 : -1))
+    } else if (e.key === 'Enter' && awaySelectedIndex >= 0) {
+      e.preventDefault()
+      const selected = filteredTeams[awaySelectedIndex]
+      setForm({ ...form, away_team_id: selected.id.toString() })
+      setTeamSearchAway(selected.name)
+      setShowAwayDropdown(false)
+      setAwaySelectedIndex(-1)
+    }
+  }
+
+  // Scroll automático para item selecionado
+  useEffect(() => {
+    if (marketSelectedIndex >= 0 && marketListRef.current) {
+      const selectedItem = marketListRef.current.children[marketSelectedIndex] as HTMLElement
+      selectedItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }, [marketSelectedIndex])
+
+  useEffect(() => {
+    if (champSelectedIndex >= 0 && champListRef.current) {
+      const selectedItem = champListRef.current.children[champSelectedIndex] as HTMLElement
+      selectedItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }, [champSelectedIndex])
+
+  useEffect(() => {
+    if (homeSelectedIndex >= 0 && homeListRef.current) {
+      const selectedItem = homeListRef.current.children[homeSelectedIndex] as HTMLElement
+      selectedItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }, [homeSelectedIndex])
+
+  useEffect(() => {
+    if (awaySelectedIndex >= 0 && awayListRef.current) {
+      const selectedItem = awayListRef.current.children[awaySelectedIndex] as HTMLElement
+      selectedItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }, [awaySelectedIndex])
+
   if (!show) return null
 
-  return (
+  const filteredMarkets = markets.filter(m => m.name.toLowerCase().includes(marketSearch.toLowerCase()))
+  const filteredChampionships = championships.filter(c => c.name.toLowerCase().includes(champSearch.toLowerCase()))
+  const filteredHomeTeams = teams.filter(t => t.name.toLowerCase().includes(teamSearchHome.toLowerCase()))
+  const filteredAwayTeams = teams.filter(t => t.name.toLowerCase().includes(teamSearchAway.toLowerCase()))
+
+
+   return (
     <div style={{
       position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -142,7 +278,7 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
         .modal-enter { animation: fadeIn 0.4s ease-out forwards; }
       `}</style>
 
-      <div className="modal-enter" style={{
+       <div className="modal-enter" style={{
         background: 'rgba(31, 41, 55, 0.85)',
         backdropFilter: 'blur(16px)',
         border: '1px solid rgba(75, 85, 99, 0.4)',
@@ -185,7 +321,7 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
           {/* Data */}
           <div>
             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#d1d5db', fontSize: '0.875rem', marginBottom: '8px', fontWeight: '500' }}>
-              <Calendar size={18} /> Data e Hora
+              <Calendar size={18} /> Data e Hora (Brasília)
             </label>
             <input
               type="datetime-local"
@@ -213,9 +349,13 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
               type="text"
               placeholder="Pesquisar mercado..."
               value={marketSearch}
-              onChange={(e) => setMarketSearch(e.target.value)}
+              onChange={(e) => {
+                setMarketSearch(e.target.value)
+                setMarketSelectedIndex(-1)
+              }}
               onFocus={() => setShowMarketDropdown(true)}
               onBlur={() => setTimeout(() => setShowMarketDropdown(false), 200)}
+              onKeyDown={handleMarketKeyDown}
               style={{
                 width: '100%',
                 padding: '14px 16px',
@@ -226,35 +366,41 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
                 fontSize: '1rem'
               }}
             />
-            {showMarketDropdown && markets.length > 0 && (
-              <ul style={{
+            {showMarketDropdown && filteredMarkets.length > 0 && (
+              <ul ref={marketListRef} style={{
                 position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10,
                 maxHeight: '200px', overflowY: 'auto',
                 background: 'rgba(31, 41, 55, 0.95)', border: '1px solid rgba(75, 85, 99, 0.5)',
                 borderRadius: '12px', marginTop: '8px', padding: 0, listStyle: 'none'
               }}>
-                {markets
-                  .filter(m => m.name.toLowerCase().includes(marketSearch.toLowerCase()))
-                  .map(m => (
-                    <li
-                      key={m.id}
-                      onMouseDown={() => {
-                        setForm({ ...form, market_id: m.id.toString() })
-                        setMarketSearch(m.name)
-                        setShowMarketDropdown(false)
-                      }}
-                      style={{
-                        padding: '12px 16px',
-                        color: '#e5e7eb',
-                        cursor: 'pointer',
-                        transition: 'background 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(55, 65, 81, 0.6)'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                    >
-                      {m.name}
-                    </li>
-                  ))}
+                {filteredMarkets.map((m, index) => (
+                  <li
+                    key={m.id}
+                    onMouseDown={() => {
+                      setForm({ ...form, market_id: m.id.toString() })
+                      setMarketSearch(m.name)
+                      setShowMarketDropdown(false)
+                    }}
+                    style={{
+                      padding: '12px 16px',
+                      color: '#e5e7eb',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s',
+                      background: index === marketSelectedIndex ? 'rgba(55, 65, 81, 0.8)' : 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(55, 65, 81, 0.6)'
+                      setMarketSelectedIndex(index)
+                    }}
+                    onMouseLeave={(e) => {
+                      if (index !== marketSelectedIndex) {
+                        e.currentTarget.style.background = 'transparent'
+                      }
+                    }}
+                  >
+                    {m.name}
+                  </li>
+                ))}
               </ul>
             )}
           </div>
@@ -268,9 +414,13 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
               type="text"
               placeholder="Pesquisar campeonato..."
               value={champSearch}
-              onChange={(e) => setChampSearch(e.target.value)}
+              onChange={(e) => {
+                setChampSearch(e.target.value)
+                setChampSelectedIndex(-1)
+              }}
               onFocus={() => setShowChampDropdown(true)}
               onBlur={() => setTimeout(() => setShowChampDropdown(false), 200)}
+              onKeyDown={handleChampKeyDown}
               style={{
                 width: '100%',
                 padding: '14px 16px',
@@ -281,40 +431,46 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
                 fontSize: '1rem'
               }}
             />
-            {showChampDropdown && championships.length > 0 && (
-              <ul style={{
+            {showChampDropdown && filteredChampionships.length > 0 && (
+              <ul ref={champListRef} style={{
                 position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10,
                 maxHeight: '200px', overflowY: 'auto',
                 background: 'rgba(31, 41, 55, 0.95)', border: '1px solid rgba(75, 85, 99, 0.5)',
                 borderRadius: '12px', marginTop: '8px', padding: 0, listStyle: 'none'
               }}>
-                {championships
-                  .filter(c => c.name.toLowerCase().includes(champSearch.toLowerCase()))
-                  .map(c => (
-                    <li
-                      key={c.id}
-                      onMouseDown={() => {
-                        setForm({ ...form, championship_id: c.id.toString() })
-                        setChampSearch(c.name)
-                        setShowChampDropdown(false)
-                      }}
-                      style={{
-                        padding: '12px 16px',
-                        color: '#e5e7eb',
-                        cursor: 'pointer',
-                        transition: 'background 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(55, 65, 81, 0.6)'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                    >
-                      {c.name}
-                    </li>
-                  ))}
+                {filteredChampionships.map((c, index) => (
+                  <li
+                    key={c.id}
+                    onMouseDown={() => {
+                      setForm({ ...form, championship_id: c.id.toString() })
+                      setChampSearch(c.name)
+                      setShowChampDropdown(false)
+                    }}
+                    style={{
+                      padding: '12px 16px',
+                      color: '#e5e7eb',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s',
+                      background: index === champSelectedIndex ? 'rgba(55, 65, 81, 0.8)' : 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(55, 65, 81, 0.6)'
+                      setChampSelectedIndex(index)
+                    }}
+                    onMouseLeave={(e) => {
+                      if (index !== champSelectedIndex) {
+                        e.currentTarget.style.background = 'transparent'
+                      }
+                    }}
+                  >
+                    {c.name}
+                  </li>
+                ))}
               </ul>
             )}
           </div>
 
-          {/* Times */}
+           {/* Times */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             {/* Mandante */}
             <div style={{ position: 'relative' }}>
@@ -325,9 +481,13 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
                 type="text"
                 placeholder="Time da casa..."
                 value={teamSearchHome}
-                onChange={(e) => setTeamSearchHome(e.target.value)}
+                onChange={(e) => {
+                  setTeamSearchHome(e.target.value)
+                  setHomeSelectedIndex(-1)
+                }}
                 onFocus={() => setShowHomeDropdown(true)}
                 onBlur={() => setTimeout(() => setShowHomeDropdown(false), 200)}
+                onKeyDown={handleHomeKeyDown}
                 style={{
                   width: '100%',
                   padding: '14px 16px',
@@ -338,40 +498,46 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
                   fontSize: '1rem'
                 }}
               />
-              {showHomeDropdown && teams.length > 0 && (
-                <ul style={{
+              {showHomeDropdown && filteredHomeTeams.length > 0 && (
+                <ul ref={homeListRef} style={{
                   position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10,
                   maxHeight: '200px', overflowY: 'auto',
                   background: 'rgba(31, 41, 55, 0.95)', border: '1px solid rgba(75, 85, 99, 0.5)',
                   borderRadius: '12px', marginTop: '8px', padding: 0, listStyle: 'none'
                 }}>
-                  {teams
-                    .filter(t => t.name.toLowerCase().includes(teamSearchHome.toLowerCase()))
-                    .map(t => (
-                      <li
-                        key={t.id}
-                        onMouseDown={() => {
-                          setForm({ ...form, home_team_id: t.id.toString() })
-                          setTeamSearchHome(t.name)
-                          setShowHomeDropdown(false)
-                        }}
-                        style={{
-                          padding: '12px 16px',
-                          color: '#e5e7eb',
-                          cursor: 'pointer',
-                          transition: 'background 0.2s'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(55, 65, 81, 0.6)'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                      >
-                        {t.name}
-                      </li>
-                    ))}
+                  {filteredHomeTeams.map((t, index) => (
+                    <li
+                      key={t.id}
+                      onMouseDown={() => {
+                        setForm({ ...form, home_team_id: t.id.toString() })
+                        setTeamSearchHome(t.name)
+                        setShowHomeDropdown(false)
+                      }}
+                      style={{
+                        padding: '12px 16px',
+                        color: '#e5e7eb',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s',
+                        background: index === homeSelectedIndex ? 'rgba(55, 65, 81, 0.8)' : 'transparent'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(55, 65, 81, 0.6)'
+                        setHomeSelectedIndex(index)
+                      }}
+                      onMouseLeave={(e) => {
+                        if (index !== homeSelectedIndex) {
+                          e.currentTarget.style.background = 'transparent'
+                        }
+                      }}
+                    >
+                      {t.name}
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>
 
-            {/* Visitante */}
+             {/* Visitante */}
             <div style={{ position: 'relative' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#d1d5db', fontSize: '0.875rem', marginBottom: '8px', fontWeight: '500' }}>
                 <Users size={18} /> Visitante
@@ -380,9 +546,13 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
                 type="text"
                 placeholder="Time visitante..."
                 value={teamSearchAway}
-                onChange={(e) => setTeamSearchAway(e.target.value)}
+                onChange={(e) => {
+                  setTeamSearchAway(e.target.value)
+                  setAwaySelectedIndex(-1)
+                }}
                 onFocus={() => setShowAwayDropdown(true)}
                 onBlur={() => setTimeout(() => setShowAwayDropdown(false), 200)}
+                onKeyDown={handleAwayKeyDown}
                 style={{
                   width: '100%',
                   padding: '14px 16px',
@@ -393,41 +563,47 @@ export default function BetModal({ show, onClose, onSave, editingBet }: BetModal
                   fontSize: '1rem'
                 }}
               />
-              {showAwayDropdown && teams.length > 0 && (
-                <ul style={{
+              {showAwayDropdown && filteredAwayTeams.length > 0 && (
+                <ul ref={awayListRef} style={{
                   position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10,
                   maxHeight: '200px', overflowY: 'auto',
                   background: 'rgba(31, 41, 55, 0.95)', border: '1px solid rgba(75, 85, 99, 0.5)',
                   borderRadius: '12px', marginTop: '8px', padding: 0, listStyle: 'none'
                 }}>
-                  {teams
-                    .filter(t => t.name.toLowerCase().includes(teamSearchAway.toLowerCase()))
-                    .map(t => (
-                      <li
-                        key={t.id}
-                        onMouseDown={() => {
-                          setForm({ ...form, away_team_id: t.id.toString() })
-                          setTeamSearchAway(t.name)
-                          setShowAwayDropdown(false)
-                        }}
-                        style={{
-                          padding: '12px 16px',
-                          color: '#e5e7eb',
-                          cursor: 'pointer',
-                          transition: 'background 0.2s'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(55, 65, 81, 0.6)'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                      >
-                        {t.name}
-                      </li>
-                    ))}
+                  {filteredAwayTeams.map((t, index) => (
+                    <li
+                      key={t.id}
+                      onMouseDown={() => {
+                        setForm({ ...form, away_team_id: t.id.toString() })
+                        setTeamSearchAway(t.name)
+                        setShowAwayDropdown(false)
+                      }}
+                      style={{
+                        padding: '12px 16px',
+                        color: '#e5e7eb',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s',
+                        background: index === awaySelectedIndex ? 'rgba(55, 65, 81, 0.8)' : 'transparent'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(55, 65, 81, 0.6)'
+                        setAwaySelectedIndex(index)
+                      }}
+                      onMouseLeave={(e) => {
+                        if (index !== awaySelectedIndex) {
+                          e.currentTarget.style.background = 'transparent'
+                        }
+                      }}
+                    >
+                      {t.name}
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>
           </div>
 
-          {/* Stake */}
+            {/* Stake */}
           <div>
             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#d1d5db', fontSize: '0.875rem', marginBottom: '8px', fontWeight: '500' }}>
               <DollarSign size={18} /> Stake (R$)
