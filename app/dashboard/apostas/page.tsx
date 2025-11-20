@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import BetModal from '@/components/BetModal'
 import SettleBetModal from '@/components/SettleBetModal'
-import { Plus, RefreshCw, Edit, CheckCircle, TrendingUp, Calendar, DollarSign, Percent } from 'lucide-react'
+import { Plus, RefreshCw, Edit, CheckCircle, TrendingUp, Calendar, DollarSign, Percent, Trophy, Users } from 'lucide-react'
 
 const supabaseUrl = 'https://ytiyrfliszifyuhghiqg.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0aXlyZmxpc3ppZnl1aGdoaXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzMTYzNjIsImV4cCI6MjA3Mzg5MjM2Mn0.DRmIJ0hee4kX7wdXt2OMXhaJ6-9RG6wL5FKZTw5hOz4'
@@ -14,12 +14,17 @@ type Bet = {
   id: string
   date: string
   market_id: number | null
+  championship_id: number | null
+  home_team_id: number | null
+  away_team_id: number | null
   stake: number
   profit_loss: number | null
   percentage: number | null
   status: string | null
 }
 
+type Championship = { id: number; name: string }
+type Team = { id: number; name: string }
 type Market = { id: number; name: string }
 
 export default function ApostasPage() {
@@ -31,7 +36,12 @@ export default function ApostasPage() {
   const [selectedBet, setSelectedBet] = useState<Bet | null>(null)
   const [balance, setBalance] = useState<number | null>(null)
 
+  const [championships, setChampionships] = useState<Championship[]>([])
+  const [teams, setTeams] = useState<Team[]>([])
   const [markets, setMarkets] = useState<Market[]>([])
+
+  const championshipMap = Object.fromEntries(championships.map(c => [c.id, c.name]))
+  const teamMap = Object.fromEntries(teams.map(t => [t.id, t.name]))
   const marketMap = Object.fromEntries(markets.map(m => [m.id, m.name]))
 
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
@@ -40,13 +50,23 @@ export default function ApostasPage() {
   const fetchData = async () => {
     setLoading(true)
 
-    const [betsRes, marketsRes, balanceRes] = await Promise.all([
+    const [
+      betsRes,
+      championshipsRes,
+      teamsRes,
+      marketsRes,
+      balanceRes
+    ] = await Promise.all([
       supabase.from('bets').select('*').order('date', { ascending: false }),
-      supabase.from('markets').select('*').order('name'),
+      supabase.from('championships').select('id, name').order('name'),
+      supabase.from('teams').select('id, name').order('name'),
+      supabase.from('markets').select('id, name').order('name'),
       supabase.from('balance').select('balance').limit(1)
     ])
 
     if (betsRes.data) setBets(betsRes.data)
+    if (championshipsRes.data) setChampionships(championshipsRes.data)
+    if (teamsRes.data) setTeams(teamsRes.data)
     if (marketsRes.data) setMarkets(marketsRes.data)
     if (balanceRes.data && balanceRes.data.length > 0) setBalance(balanceRes.data[0].balance || 0)
 
@@ -89,10 +109,8 @@ export default function ApostasPage() {
     }}>
       <style jsx>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        .slide-down { animation: slideDown 0.3s ease-out forwards; }
         .spin { animation: spin 1s linear infinite; }
       `}</style>
 
@@ -125,7 +143,7 @@ export default function ApostasPage() {
             SALDO ATUAL DA BANCA
           </span>
         </div>
-        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff', letterSpacing: '-0.02em' }}>
+        <div style={{ fontSize: '3rem', fontWeight: 'bold', color: '#fff', letterSpacing: '-0.02em' }}>
           R$ {balance !== null ? balance.toFixed(2).replace('.', ',') : '--'}
         </div>
       </div>
@@ -144,9 +162,7 @@ export default function ApostasPage() {
               : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             color: '#fff', border: 'none', borderRadius: '12px',
             fontWeight: '600', fontSize: '1rem', cursor: 'pointer',
-            boxShadow: hoveredButton === 'nova'
-              ? '0 10px 30px rgba(16, 185, 129, 0.5)'
-              : '0 4px 15px rgba(16, 185, 129, 0.3)',
+            boxShadow: hoveredButton === 'nova' ? '0 10px 30px rgba(16, 185, 129, 0.5)' : '0 4px 15px rgba(16, 185, 129, 0.3)',
             transform: hoveredButton === 'nova' ? 'scale(1.05)' : 'scale(1)',
             transition: 'all 0.3s ease'
           }}
@@ -165,9 +181,7 @@ export default function ApostasPage() {
             background: hoveredButton === 'atualizar' ? '#374151' : '#4b5563',
             color: '#fff', border: 'none', borderRadius: '12px',
             fontWeight: '600', fontSize: '1rem', cursor: 'pointer',
-            boxShadow: hoveredButton === 'atualizar'
-              ? '0 4px 15px rgba(75, 85, 99, 0.4)'
-              : '0 2px 8px rgba(75, 85, 99, 0.2)',
+            boxShadow: hoveredButton === 'atualizar' ? '0 4px 15px rgba(75, 85, 99, 0.4)' : '0 2px 8px rgba(75, 85, 99, 0.2)',
             transform: hoveredButton === 'atualizar' ? 'scale(1.05)' : 'scale(1)',
             transition: 'all 0.3s ease'
           }}
@@ -207,8 +221,21 @@ export default function ApostasPage() {
                       <Calendar size={16} /> Data
                     </div>
                   </th>
-                  <th style={{ padding: '18px 24px', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#d1d5db', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {/* <th style={{ padding: '18px 24px', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#d1d5db', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Mercado
+                  </th> */}
+                  {/* <th style={{ padding: '18px 24px', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#d1d5db', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Trophy size={16} /> Campeonato
+                    </div>
+                  </th> */}
+                  <th style={{ padding: '18px 24px', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#d1d5db', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Users size={16} /> Mandante
+                    </div>
+                  </th>
+                  <th style={{ padding: '18px 24px', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#d1d5db', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Visitante
                   </th>
                   <th style={{ padding: '18px 24px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '600', color: '#d1d5db', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Stake
@@ -244,7 +271,7 @@ export default function ApostasPage() {
                     <td style={{ padding: '18px 24px', color: '#e5e7eb', fontSize: '0.95rem' }}>
                       {formatDate(bet.date)}
                     </td>
-                    <td style={{ padding: '18px 24px' }}>
+                    {/* <td style={{ padding: '18px 24px' }}>
                       <span style={{
                         padding: '6px 14px', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: '600',
                         background: 'rgba(139, 92, 246, 0.25)', color: '#c4b5fd',
@@ -252,6 +279,20 @@ export default function ApostasPage() {
                       }}>
                         {marketMap[bet.market_id || 0] || '—'}
                       </span>
+                    </td> */}
+                    {/* <td style={{ padding: '18px 24px' }}>
+                      <span style={{
+                        padding: '6px 14px', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: '600',
+                        color: '#e5e7eb'
+                      }}>
+                        {championshipMap[bet.championship_id || 0] || '—'}
+                      </span>
+                    </td> */}
+                    <td style={{ padding: '18px 24px', color: '#e5e7eb', fontWeight: '600' }}>
+                      {teamMap[bet.home_team_id || 0] || '—'}
+                    </td>
+                    <td style={{ padding: '18px 24px', color: '#e5e7eb', fontWeight: '600' }}>
+                      {teamMap[bet.away_team_id || 0] || '—'}
                     </td>
                     <td style={{ padding: '18px 24px', textAlign: 'right', color: '#e5e7eb', fontWeight: '600' }}>
                       R$ {bet.stake.toFixed(2)}
