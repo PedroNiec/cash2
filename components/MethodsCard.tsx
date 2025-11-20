@@ -118,10 +118,10 @@ export default function MethodsCard() {
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: '1px solid rgba(75,85,99,0.5)',
+                  backgroundColor: '#628ecaff',
+                  border: '1px solid rgba(17, 43, 78, 0.5)',
                   borderRadius: '8px',
-                  color: '#e2e8f0'
+                  color: '#fff'
                 }}
                 formatter={(value: number) => `R$ ${value.toFixed(2).replace('.', ',')}`}
               />

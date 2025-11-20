@@ -106,7 +106,7 @@ export default function WeeklyPLChart() {
               <XAxis
                 dataKey="date"
                 tick={{ fill: '#9ca3af', fontSize: '0.75rem' }}
-                axisLine={{ stroke: 'rgba(75,85,99,0.5)' }}
+                axisLine={{ stroke: 'rgba(64, 92, 64, 0.5)' }}
               />
               <YAxis
                 tick={{ fill: '#9ca3af', fontSize: '0.75rem' }}
@@ -115,10 +115,10 @@ export default function WeeklyPLChart() {
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: '1px solid rgba(75,85,99,0.5)',
+                  backgroundColor: '#628ecaff',
+                  border: '1px solid rgba(17, 43, 78, 0.5)',
                   borderRadius: '8px',
-                  color: '#e2e8f0'
+                  color: '#fff'
                 }}
                 formatter={(value: number) => `R$ ${value.toFixed(2).replace('.', ',')}`}
               />

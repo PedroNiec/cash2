@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const menuItems = [
     { label: 'Geral', path: '/dashboard', icon: Home },
     { label: 'Apostas', path: '/dashboard/apostas', icon: BarChart3 },
-    { label: 'Configurações', path: '/dashboard/configuracoes', icon: Settings },
+    // { label: 'Configurações', path: '/dashboard/configuracoes', icon: Settings },
     { label: 'Rotina', path: '/dashboard/rotina', icon: Clock },
     { label: 'Fechamento', path: '/dashboard/fecharDia', icon: TrendingUp },
     { label: 'Tarefas', path: '/dashboard/tarefas', icon: AlarmCheck },
