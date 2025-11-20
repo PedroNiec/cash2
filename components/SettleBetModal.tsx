@@ -30,15 +30,20 @@ export default function SettleBetModal({ show, bet, onClose, onSaved }: SettleBe
   const [hoveredBtn, setHoveredBtn] = useState<'save' | 'cancel' | null>(null)
 
   useEffect(() => {
-    if (bet) {
-      const initialValue = bet.profit_loss !== null && bet.profit_loss !== undefined
-        ? String(Math.abs(bet.profit_loss))
-        : ''
-      setReturnedValue(initialValue)
-      setPercentage(bet.stake && bet.profit_loss ? (bet.profit_loss / bet.stake) * 100 : 0)
-      setResult(bet.profit_loss && bet.profit_loss >= 0 ? 'green' : 'red')
+  if (bet) {
+    const initialValue = bet.profit_loss !== null && bet.profit_loss !== undefined
+      ? String(Math.abs(bet.profit_loss))
+      : ''
+    setReturnedValue(initialValue)
+    setPercentage(bet.stake && bet.profit_loss ? (bet.profit_loss / bet.stake) * 100 : 0)
+
+    if (bet.profit_loss !== null && bet.profit_loss !== undefined) {
+      setResult(bet.profit_loss >= 0 ? 'green' : 'red')
+    } else {
+      setResult('green')
     }
-  }, [bet])
+  }
+}, [bet])
 
   useEffect(() => {
     if (bet && returnedValue !== '' && !isNaN(parseFloat(returnedValue))) {
