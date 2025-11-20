@@ -287,7 +287,7 @@ export default function FecharDiaModal({ show, onClose, onSave }: FecharDiaModal
               fontSize: '0.875rem'
             }}>
               <DollarSign size={16} />
-              M1 Lucro *
+              M1 Lucro (Lay Goleada)*
             </label>
             <input
               type="number"
@@ -352,7 +352,7 @@ export default function FecharDiaModal({ show, onClose, onSave }: FecharDiaModal
               fontSize: '0.875rem'
             }}>
               <DollarSign size={16} />
-              M2 Lucro *
+              M2 Lucro (Match Odds) *
             </label>
             <input
               type="number"
@@ -417,7 +417,7 @@ export default function FecharDiaModal({ show, onClose, onSave }: FecharDiaModal
               fontSize: '0.875rem'
             }}>
               <DollarSign size={16} />
-              M3 Lucro *
+              M3 Lucro (Under limite) *
             </label>
             <input
               type="number"
